@@ -9,6 +9,7 @@ const orderRoutes = require('./routes/orderRoutes');
 
 const app = express();
 connectDB();
+console.log("DEBUG MONGO_URI:", process.env.MONGO_URI ? "LOADED: " + process.env.MONGO_URI.substring(0, 20) + "..." : "MISSING!");
 
 // Tighten CORS security
 app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:5173' }));
