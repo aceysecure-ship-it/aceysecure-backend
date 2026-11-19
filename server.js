@@ -9,10 +9,31 @@ const orderRoutes = require('./routes/orderRoutes');
 
 const app = express();
 connectDB();
-console.log("DEBUG MONGO_URI:", process.env.MONGO_URI ? "LOADED: " + process.env.MONGO_URI.substring(0, 20) + "..." : "MISSING!");
 
-// Tighten CORS security
-app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:5173' }));
+// Parse comma-separated FRONTEND_URL into an array of allowed origins.
+// Example .env value: https://aceysecure.com.ng,https://www.aceysecure.com.ng
+const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:5173')
+  .split(',')
+  .map((url) => url.trim())
+  .filter(Boolean);
+
+console.log('CORS: Allowing origins:', allowedOrigins);
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Allow requests with no origin (mobile apps, curl, Postman, server-to-server)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      console.warn(`CORS blocked request from origin: ${origin}`);
+      return callback(new Error('Not allowed by CORS'));
+    },
+    credentials: true,
+  })
+);
+
 app.use(express.json({ limit: '10kb' }));
 
 // API Routes
